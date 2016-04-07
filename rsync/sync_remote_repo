@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo  "`date`: starting remote sync"
+rsync  --delete -zavh build_docker:/storage/registry/ /home/pagero/storage/new/ 1>&2 >/tmp/rsync_job.log
+echo "`date`: done remote sync"

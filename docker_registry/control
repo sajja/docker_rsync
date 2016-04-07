@@ -1,0 +1,99 @@
+#!/bin/bash
+
+function registryStatus()
+{
+	if docker ps |grep -q 'registry'; then
+		ds="running"
+	else
+		ds="stopped"	
+	fi
+}
+
+function registryFrontendSatus() 
+{
+	if docker ps |grep -q 'konradkleine/docker-registry-frontend:v2'; then
+		rfs="running"	
+	else
+		rfs="stopped"
+	fi
+}
+
+function dockerStatus() 
+{
+	registryStatus
+	registryFrontendSatus
+	if [ $rfs = "running" ] && [ $ds = "running" ]; then
+		status="running"
+	else
+		status="stopped"
+	fi
+}
+
+function printStatus() 
+{
+	registryStatus
+	registryFrontendSatus
+	if [ $rfs = "running" ] && [ $ds = "running" ]; then
+		echo "Both registry and frontend is running"
+	else
+		echo "Registry: $ds"
+		echo "Frontend: $rfs"
+	fi
+}
+
+function startContainers() {
+	if [ $ds = "running" ]; then
+		echo "Docker registry is already running..."
+	else 
+		echo "Starting registry"
+		docker run -d -p 80:5000 --restart=always \
+                	   -v /home/pagero/storage/new:/var/lib/registry registry:2
+	fi
+
+	if [ $rfs = "running" ]; then
+		echo "Frontend is already running..."
+	else	
+        	echo "Starting registry frontend"
+        	docker run  -d --restart=always \
+		    -e ENV_DOCKER_REGISTRY_HOST=10.4.1.110  \
+                    -e ENV_DOCKER_REGISTRY_PORT=80   \
+                    -p 8080:80 \
+                    konradkleine/docker-registry-frontend:v2
+	fi
+}
+
+function stopContainers() 
+{
+	registryStatus
+	registryFrontendSatus
+
+	if [ $ds == "running" ]; then
+		image=`docker ps |grep registry|cut -d " " -f1`
+		echo "Stopping registry...."
+		docker stop $image
+	else
+		echo "Docker registry is not running..."
+	fi
+
+	if [ $rfs == "running" ]; then
+		image=`docker ps |grep "docker-registry-frontend:v2"|cut -d " " -f1`
+		echo "Stopping frontend ....."
+		docker stop $image
+	else
+		echo "Frontend is not running...."
+	fi
+}
+
+dockerStatus
+
+if [ -z $1 ]; then
+	echo "control status|start|stop"
+elif [ $1 == "status" ]; then
+	printStatus
+elif [ $1 == "start" ]; then
+	startContainers
+elif [ $1 == "stop" ]; then
+	stopContainers
+else
+	echo "control status|start|stop"
+fi
