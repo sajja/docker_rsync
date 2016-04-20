@@ -46,8 +46,8 @@ function startContainers() {
 		echo "Docker registry is already running..."
 	else 
 		echo "Starting registry"
-		docker run -d -p 80:5000 --restart=always \
-                	   -v /home/pagero/storage/new:/var/lib/registry registry:2
+		docker run -d -p 80:5000 --restart=always\
+                           -v /home/pagero/storage/registry/:/var/lib/registry registry:2.3.1
 	fi
 
 	if [ $rfs = "running" ]; then
