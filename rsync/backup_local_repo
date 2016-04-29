@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo  "`date`: starting repo backup"
+rsync --delete -zavhu pagero@10.4.1.110:/storage/ /home/pagero/storage 1>&2 >/tmp/rsync_job.log
+echo "`date`: done remote sync"
