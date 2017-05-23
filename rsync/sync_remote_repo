@@ -1,5 +1,5 @@
 #!/bin/bash
 
 echo  "`date`: starting remote sync"
-rsync --delete --exclude .snapshot -zavhu build_docker:/storage/ /home/pagero/storage 1>&2 >/tmp/rsync_job.log
+rsync --delete --exclude .snapshot -zavhu thn-build-docker:/storage/ /home/pagero/storage 1>&2 >/tmp/rsync_job.log
 echo "`date`: done remote sync"
